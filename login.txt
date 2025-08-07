@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #login-box {
+      background: white;
+      padding: 30px;
+      border: 1px solid #ccc;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #036b3f;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #024d2c;
+    }
+  </style>
+</head>
+<body>
+  <div id="login-box">
+    <h2>Enter Password</h2>
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="checkPassword()">Login</button>
+    <p id="message" style="color:red;"></p>
+  </div>
+
+  <script>
+    function checkPassword() {
+      const password = document.getElementById('password').value;
+      const correctPassword = "ABUtrack2025"; // Change to your desired password
+
+      if (password === correctPassword) {
+        window.location.href = "index.html"; // redirect to main site
+      } else {
+        document.getElementById('message').textContent = "Incorrect password!";
+      }
+    }
+  </script>
+</body>
+</html>
