@@ -1,0 +1,56 @@
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+}
+
+#map {
+  height: 100vh;
+  width: 75%;
+}
+
+#side-panel {
+  width: 25%;
+  padding: 10px;
+  background-color: #f4f4f4;
+  overflow-y: auto;
+  border-left: 1px solid #ccc;
+}
+
+#vehicle-status {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#vehicle-status th, #vehicle-status td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  font-size: 14px;
+  text-align: left;
+}
+
+#vehicle-status th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+#logo {
+  width: 100px;
+  margin: 10px;
+}
+
+button {
+  padding: 10px;
+  margin: 5px 0;
+  width: 100%;
+  background: #036b3f;
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #024d2c;
+}
