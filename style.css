@@ -1,56 +1,80 @@
+/* General Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  display: flex;
+/* Login Page Styling */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #e9f5ec;
+}
+
+.login-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 0.5rem;
+    margin: 1rem 0;
+}
+
+.login-container button {
+    padding: 0.5rem 1rem;
+    background: darkgreen;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.login-container button:hover {
+    background: green;
+}
+
+.error {
+    color: red;
+    font-size: 0.9rem;
+}
+
+/* Dashboard Layout */
+header {
+    background: green;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+main {
+    display: flex;
+    height: calc(100vh - 60px);
 }
 
 #map {
-  height: 100vh;
-  width: 75%;
+    flex: 3;
 }
 
-#side-panel {
-  width: 25%;
-  padding: 10px;
-  background-color: #f4f4f4;
-  overflow-y: auto;
-  border-left: 1px solid #ccc;
+#status-panel {
+    flex: 1;
+    background: #f7f7f7;
+    padding: 1rem;
+    overflow-y: auto;
 }
 
-#vehicle-status {
-  width: 100%;
-  border-collapse: collapse;
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-#vehicle-status th, #vehicle-status td {
-  border: 1px solid #ccc;
-  padding: 6px;
-  font-size: 14px;
-  text-align: left;
+th, td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #ddd;
 }
 
-#vehicle-status th {
-  background-color: #4CAF50;
-  color: white;
-}
-
-#logo {
-  width: 100px;
-  margin: 10px;
-}
-
-button {
-  padding: 10px;
-  margin: 5px 0;
-  width: 100%;
-  background: #036b3f;
-  color: white;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #024d2c;
+th {
+    background: #ddd;
 }

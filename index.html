@@ -1,63 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vehicle Tracking Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            text-align: center;
-        }
-        #login-box {
-            margin-top: 100px;
-            background: white;
-            padding: 30px;
-            display: inline-block;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px gray;
-        }
-        input {
-            padding: 10px;
-            margin: 5px;
-            width: 200px;
-        }
-        button {
-            padding: 10px 20px;
-            background: green;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background: darkgreen;
-        }
-    </style>
+    <title>Login - Vehicle Tracking</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="login-page">
+    <div class="login-container">
+        <h2>Admin Login</h2>
+        <input type="password" id="password" placeholder="Enter Password">
+        <button onclick="checkPassword()">Login</button>
+        <p id="error-message" class="error"></p>
+    </div>
 
-<div id="login-box">
-    <h2>Enter Password to Access</h2>
-    <input type="password" id="password" placeholder="Password">
-    <br>
-    <button onclick="checkPassword()">Login</button>
-    <p id="error" style="color:red;"></p>
-</div>
+    <script>
+        const correctPassword = "bukarmusa"; // keep your same password here
 
-<script>
-    function checkPassword() {
-        // Change this password to whatever you want
-        const correctPassword = "Bukar Musa";  
-        const enteredPassword = document.getElementById("password").value;
-
-        if (enteredPassword === correctPassword) {
-            // Redirect to the actual dashboard page
-            window.location.href = "dashboard.html";  
-        } else {
-            document.getElementById("error").textContent = "Incorrect password!";
+        function checkPassword() {
+            const entered = document.getElementById("password").value;
+            if (entered === correctPassword) {
+                window.location.href = "dashboard.html";
+            } else {
+                document.getElementById("error-message").innerText = "Incorrect password. Try again.";
+            }
         }
-    }
-</script>
-
+    </script>
 </body>
 </html>
