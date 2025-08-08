@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 100px;
+            background-color: #f4f4f4;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkgreen;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Enter Password to Access Dashboard</h2>
+    <input type="password" id="password" placeholder="Enter password">
+    <br><br>
+    <button onclick="checkPassword()">Login</button>
+    <div class="error" id="error"></div>
+
+    <script>
+        function checkPassword() {
+            var password = document.getElementById("password").value;
+            var correctPassword = "mysecurepassword"; 
+
+            if (password === correctPassword) {
+                window.location.href = "dashboard.html";
+            } else {
+                document.getElementById("error").innerText = "Wrong password, try again!";
+            }
+        }
+    </script>
+
+</body>
+</html>
