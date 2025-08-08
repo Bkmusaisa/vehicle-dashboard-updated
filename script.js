@@ -6,22 +6,32 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let markers = {};
 
 async function fetchData() {
-    const url = "https://script.google.com/macros/s/AKfycbwoQx-qbNPQS9h4sibvu_8MZDUbIVpW7qI_gcb_eIc/dev?nocache=" + new Date().getTime();
-    const res = await fetch(url);
-    const data = await res.json();
-    updateMap(data);
-    updateTable(data);
+  try {
+    const url = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbwoQx-qbNPQS9h4sibvu_8MZDUbIVpW7qI_gcb_eIc/dev/exec"; // Replace with your Web App URL
+    const response = await fetch(url, { mode: "no-cors" });
+    const text = await response.text();
+    
+    // Extract JSON from HTML body
+    const jsonMatch = text.match(/\[.*\]/);
+    if (jsonMatch) {
+      const data = JSON.parse(jsonMatch[0]);
+      console.log("Fetched data:", data);
+      updateMap(data);
+    } else {
+      console.error("No JSON found in response");
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 }
 
 function updateMap(data) {
-    Object.values(markers).forEach(marker => map.removeLayer(marker));
-    markers = {};
-    data.forEach(vehicle => {
-        const marker = L.marker([vehicle.lat, vehicle.lng]).addTo(map)
-            .bindPopup(`<b>${vehicle.name}</b><br>Speed: ${vehicle.speed} km/h`);
-        markers[vehicle.name] = marker;
-    });
+  // Your existing map update code
 }
+
+setInterval(fetchData, 5000);
+fetchData();
+
 
 function updateTable(data) {
     const tbody = document.querySelector('#status-table tbody');
