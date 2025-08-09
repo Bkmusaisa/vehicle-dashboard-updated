@@ -7,7 +7,7 @@ let markers = {};
 
 async function fetchData() {
   try {
-    const url = "https://script.google.com/macros/s/AKfycbxgedWWobwpCLf8r2x_sFfUQYaulu0abft6fKFDXuFR4H07f6KTy2FeVLwTiO6li-hS/exec"; // Replace with your Web App URL
+    const url = "https://script.google.com/macros/s/AKfycbzYZhh5JREt8QP6L908Av9FYH-Fcx4rC7r743gjCHv6pv1QCvRUO8m30reKB9L7-KJ0/exec"; // Replace with your Web App URL
     const response = await fetch(url, { mode: "no-cors" });
     const text = await response.text();
     
