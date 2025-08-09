@@ -1,52 +1,20 @@
-const map = L.map('map').setView([11.1562, 7.6545], 14); // ABU Zaria center
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-let markers = {};
+const sheetURL = "https://script.google.com/macros/s/AKfycbysU13girZLgY8xfApAlvCeF-uyDoIDvGPZZxiRdBfy5y4NDNj8wyMlJLpqcO57GWl4/exec"; // No extra https://
 
 async function fetchData() {
-  try {
-    const url = "https://script.google.com/macros/s/AKfycbzYZhh5JREt8QP6L908Av9FYH-Fcx4rC7r743gjCHv6pv1QCvRUO8m30reKB9L7-KJ0/exec"; // Replace with your Web App URL
-    const response = await fetch(url, { mode: "no-cors" });
-    const text = await response.text();
-    
-    // Extract JSON from HTML body
-    const jsonMatch = text.match(/\[.*\]/);
-    if (jsonMatch) {
-      const data = JSON.parse(jsonMatch[0]);
-      console.log("Fetched data:", data);
-      updateMap(data);
-    } else {
-      console.error("No JSON found in response");
+    try {
+        const response = await fetch(sheetURL);
+        const data = await response.json(); // Parse JSON directly
+
+        if (!Array.isArray(data)) {
+            console.error("Invalid JSON format:", data);
+            return;
+        }
+
+        console.log("Fetched data:", data);
+        // You can now pass `data` to your map/table update function
+    } catch (error) {
+        console.error("Error fetching data:", error);
     }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
 }
 
-function updateMap(data) {
-  // Your existing map update code
-}
-
-setInterval(fetchData, 5000);
-fetchData();
-
-
-function updateTable(data) {
-    const tbody = document.querySelector('#status-table tbody');
-    tbody.innerHTML = '';
-    data.forEach(vehicle => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${vehicle.name}</td>
-                <td>${vehicle.speed}</td>
-                <td>${vehicle.lat.toFixed(4)}, ${vehicle.lng.toFixed(4)}</td>
-                <td>${vehicle.time}</td>
-            </tr>
-        `;
-    });
-}
-
-setInterval(fetchData, 5000);
 fetchData();
