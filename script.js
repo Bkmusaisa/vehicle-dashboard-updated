@@ -1,8 +1,28 @@
 async function fetchData() {
   try {
-    const response = await fetch(sheetURL, {
-      mode: 'no-cors' 
+    // Add cache-busting and no-cache header
+    const url = `${sheetURL}?t=${Date.now()}`;
+    console.log("Fetching:", url); // Debugging help
+    
+    const response = await fetch(url, { 
+      cache: 'no-store',
+      mode: 'no-cors' // Bypass CORS for Apps Script
     });
+    
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    const data = await response.json();
+    
+    // Add this validation
+    if (!Array.isArray(data?.data)) {
+      throw new Error("Invalid data format");
+    }
+    
+    updateMap(data.data); // Note: Changed to data.data
+  } catch (err) {
+    console.error("Fetch failed (retrying in 10s):", err);
+    setTimeout(fetchData, 10000); // Auto-retry after 10s
+  }
+}
     
 // ✅ Fixed: Single clean version (remove duplicates)
 const sheetURL = "https://script.google.com/macros/s/AKfycbz9O7LzggJdHaJUko9Qn_CUr07iVFfmd6NMM-ylAgSy1NzHFgzc8DbruQcX1hMgZ_vJ/exec";
@@ -51,7 +71,7 @@ async function fetchData() {
 }
 
 // Update map with vehicle data
-function updateMap(data) {
+function updateMap(data.data); {
   data.forEach(vehicle => {
     const { VehicleID, Lat, Lng } = vehicle;
     if (!Lat || !Lng) return;
@@ -80,7 +100,7 @@ function updateMap(data) {
 // Refresh data every 5 seconds
 setInterval(fetchData, 5000);
 
-function updateMap(data) {
+function updateMap(data.data); {
   data.forEach(vehicle => {
     const { VehicleID, Lat, Lng, Time } = vehicle; // Added Time
     if (!Lat || !Lng) return;
