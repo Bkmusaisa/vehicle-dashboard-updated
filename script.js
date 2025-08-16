@@ -1,30 +1,4 @@
-async function fetchData() {
-  try {
-    // Add cache-busting and no-cache header
-    const url = `${sheetURL}?t=${Date.now()}`;
-    console.log("Fetching:", url); // Debugging help
-    
-    const response = await fetch(url, { 
-      cache: 'no-store',
-      mode: 'no-cors' // Bypass CORS for Apps Script
-    });
-    
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const data = await response.json();
-    
-    // Add this validation
-    if (!Array.isArray(data?.data)) {
-      throw new Error("Invalid data format");
-    }
-    
-    updateMap(data.data); // Note: Changed to data.data
-  } catch (err) {
-    console.error("Fetch failed (retrying in 10s):", err);
-    setTimeout(fetchData, 10000); // Auto-retry after 10s
-  }
-}
-    
-// ✅ Fixed: Single clean version (remove duplicates)
+// Configuration
 const sheetURL = "https://script.google.com/macros/s/AKfycbz9O7LzggJdHaJUko9Qn_CUr07iVFfmd6NMM-ylAgSy1NzHFgzc8DbruQcX1hMgZ_vJ/exec";
 const ADMIN_LAT = 11.1523;
 const ADMIN_LNG = 7.6548;
@@ -50,9 +24,7 @@ L.marker([ADMIN_LAT, ADMIN_LNG], {
     html: '⬤', 
     iconSize: [20, 20] 
   }) 
-})
-.bindPopup("Admin Location - ABU Senate Building")
-.addTo(map);
+}).bindPopup("Admin Location - ABU Senate Building").addTo(map);
 
 let vehicleMarkers = {};
 let vehicleTrails = {};
@@ -60,71 +32,60 @@ let vehicleTrails = {};
 // Fetch data from Google Sheets
 async function fetchData() {
   try {
-    const response = await fetch(sheetURL, { cache: "no-cache" });
+    const url = `${sheetURL}?t=${Date.now()}`; // Cache-busting
+    const response = await fetch(url, { 
+      cache: 'no-store',
+      mode: 'no-cors'
+    });
+    
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     const data = await response.json();
-    if (!Array.isArray(data)) return console.error("Invalid data format");
-    updateMap(data);
+    
+    // Handle both direct array and {data: array} responses
+    const vehicles = Array.isArray(data) ? data : (data.data || []);
+    if (!vehicles.length) return console.warn("No vehicle data received");
+    
+    updateMap(vehicles);
   } catch (err) {
-    console.error("Error fetching data:", err);
+    console.error("Fetch failed (retrying in 10s):", err);
+    setTimeout(fetchData, 10000); // Retry after 10s
   }
 }
 
 // Update map with vehicle data
-function updateMap(data.data); {
-  data.forEach(vehicle => {
-    const { VehicleID, Lat, Lng } = vehicle;
+function updateMap(vehicles) {
+  vehicles.forEach(vehicle => {
+    const { VehicleID, Lat, Lng, Time } = vehicle;
     if (!Lat || !Lng) return;
 
     const color = vehicleColors[VehicleID] || "black";
+    const popupContent = `${VehicleID}<br>Time: ${Time || "N/A"}<br>Lat: ${Lat.toFixed(6)}, Lng: ${Lng.toFixed(6)}`;
 
     // Update or create marker
     if (vehicleMarkers[VehicleID]) {
-      vehicleMarkers[VehicleID].setLatLng([Lat, Lng]);
+      vehicleMarkers[VehicleID]
+        .setLatLng([Lat, Lng])
+        .setPopupContent(popupContent);
     } else {
       vehicleMarkers[VehicleID] = L.circleMarker([Lat, Lng], {
         color: color,
-        radius: 8
-      }).addTo(map).bindPopup(VehicleID);
+        radius: 8,
+        fillOpacity: 0.8
+      }).addTo(map).bindPopup(popupContent);
     }
 
     // Update or create trail
     if (!vehicleTrails[VehicleID]) {
-      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], { color: color }).addTo(map);
-    } else {
-      vehicleTrails[VehicleID].addLatLng([Lat, Lng]);
-    }
-  });
-}
-
-// Refresh data every 5 seconds
-setInterval(fetchData, 5000);
-
-function updateMap(data.data); {
-  data.forEach(vehicle => {
-    const { VehicleID, Lat, Lng, Time } = vehicle; // Added Time
-    if (!Lat || !Lng) return;
-
-    const color = vehicleColors[VehicleID] || "black";
-    const popupContent = `${VehicleID}<br>Time: ${Time || "N/A"}`; // Added time display
-
-    // Update marker with time
-    if (vehicleMarkers[VehicleID]) {
-      vehicleMarkers[VehicleID]
-        .setLatLng([Lat, Lng])
-        .setPopupContent(popupContent); // Update popup
-    } else {
-      vehicleMarkers[VehicleID] = L.circleMarker([Lat, Lng], {
+      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], { 
         color: color,
-        radius: 8
-      }).addTo(map).bindPopup(popupContent); // Show time in popup
-    }
-
-    // Trail logic remains the same
-    if (!vehicleTrails[VehicleID]) {
-      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], { color: color }).addTo(map);
+        weight: 3
+      }).addTo(map);
     } else {
       vehicleTrails[VehicleID].addLatLng([Lat, Lng]);
     }
   });
 }
+
+// Initialize and start updates
+fetchData(); // Initial load
+setInterval(fetchData, 5000); // Refresh every 5 seconds
