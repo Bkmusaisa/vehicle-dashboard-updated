@@ -1,5 +1,5 @@
 // Configuration
-const sheetURL = "https://script.google.com/macros/s/AKfycbyopuP9hDyinoaM4oqUE5vUP8jpCNTzZSrUeDzcTcRljm3y5OI5ExFxIM6e9JPuwqzq/exec";
+const sheetURL = "https://script.google.com/macros/s/AKfycbwrGelGMLzOhq0EopHZLRJlPtROj_BaF9XivCXmcqwKopD3TC3Tz2RpvGRnjQe1k9uD/exec";
 const ADMIN_LAT = 11.1523;
 const ADMIN_LNG = 7.6548;
 
@@ -29,24 +29,29 @@ L.marker([ADMIN_LAT, ADMIN_LNG], {
 let vehicleMarkers = {};
 let vehicleTrails = {};
 
-// Modified fetch function (CORS-compatible)
 async function fetchData() {
   try {
-    const url = `${sheetURL}?t=${Date.now()}`;
-    const response = await fetch(url, {
-      cache: 'no-store'
-      // Removed mode: 'no-cors' to allow reading response
-    });
+    const url = `${sheetURL}?t=${Date.now()}`; // Cache buster
+    console.log("Fetching:", url);
     
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const data = await response.json();
+    const response = await fetch(url);
     
-    // Handle both direct array and {data: array} responses
-    const vehicles = Array.isArray(data) ? data : (data.data || []);
-    updateMap(vehicles);
+    // Handle non-200 responses
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    // Validate response structure
+    if (!result.data) {
+      throw new Error("Invalid data format");
+    }
+    
+    updateMap(result.data);
   } catch (err) {
-    console.error("Fetch error (retrying in 10s):", err);
-    setTimeout(fetchData, 10000);
+    console.error("Fetch error:", err);
+    setTimeout(fetchData, 10000); // Retry after 10s
   }
 }
 
