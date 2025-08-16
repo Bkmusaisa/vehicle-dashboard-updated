@@ -1,11 +1,11 @@
 // Configuration
-const url = `https://script.google.com/macros/s/AKfycbwrGelGMLzOhq0EopHZLRJlPtROj_BaF9XivCXmcqwKopD3TC3Tz2RpvGRnjQe1k9uD/exec?t=${Date.now()}`;
-const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-
-// Use proxyUrl instead of url in fetch()
-const sheetURL = "https://script.google.com/macros/s/AKfycbwrGelGMLzOhq0EopHZLRJlPtROj_BaF9XivCXmcqwKopD3TC3Tz2RpvGRnjQe1k9uD/exec";
+const SCRIPT_ID = "AKfycbwp8MJezh9XjFHayC0BlL_MCAn_v2SkV90jmEls-cGrFyfmTtSNx-ZAGxguqC-kg1dV";
 const ADMIN_LAT = 11.1523;
 const ADMIN_LNG = 7.6548;
+
+// URL Configuration (using your new URL)
+const PROD_URL = `https://script.google.com/macros/s/${SCRIPT_ID}/exec`;
+const DEV_URL = PROD_URL.replace('/exec', '/dev');
 
 const vehicleColors = {
   "Vehicle 1": "blue",
@@ -15,56 +15,74 @@ const vehicleColors = {
   "Vehicle 5": "purple"
 };
 
-// Initialize map
-let map = L.map("map").setView([ADMIN_LAT, ADMIN_LNG], 14);
+// Map Initialization
+const map = L.map("map").setView([ADMIN_LAT, ADMIN_LNG], 14);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19
+  maxZoom: 19,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-// Admin marker
-L.marker([ADMIN_LAT, ADMIN_LNG], { 
-  icon: L.divIcon({ 
-    className: 'admin-marker', 
-    html: '⬤', 
-    iconSize: [20, 20] 
-  }) 
+// Admin Marker
+L.marker([ADMIN_LAT, ADMIN_LNG], {
+  icon: L.divIcon({
+    className: 'admin-marker',
+    html: '⬤',
+    iconSize: [20, 20]
+  })
 }).bindPopup("Admin Location - ABU Senate Building").addTo(map);
 
-let vehicleMarkers = {};
-let vehicleTrails = {};
+// Vehicle Tracking
+const vehicleMarkers = {};
+const vehicleTrails = {};
 
+// Enhanced Fetch Function with 3 Fallback Methods
 async function fetchData() {
-  try {
-    // Add /dev to the URL to prevent redirects
-    const url = `${sheetURL.replace('/exec', '/dev')}?t=${Date.now()}`;
-    console.log("Fetching:", https://script.google.com/macros/s/AKfycbwrGelGMLzOhq0EopHZLRJlPtROj_BaF9XivCXmcqwKopD3TC3Tz2RpvGRnjQe1k9uD/exec);
-    
-    const response = await fetch(url, {
-      redirect: 'follow', // Explicitly follow redirects
-      credentials: 'omit' // Important for CORS
-    });
-    
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    
-    const data = await response.json();
-    if (!data?.data) throw new Error("Invalid data format");
-    
-    updateMap(data.data);
-  } catch (err) {
-    console.error("Fetch error (retrying in 5s):", err);
-    setTimeout(fetchData, 5000);
+  const attempts = [
+    { url: DEV_URL, options: { redirect: 'follow', credentials: 'omit' } },
+    { url: PROD_URL, options: { redirect: 'follow', credentials: 'omit' } },
+    { url: `https://cors-anywhere.herokuapp.com/${PROD_URL}`, options: {} }
+  ];
+
+  for (const attempt of attempts) {
+    try {
+      const url = `${attempt.url}?t=${Date.now()}`;
+      console.log("Attempting fetch from:", url);
+      
+      const response = await fetch(url, attempt.options);
+      
+      if (!response.ok) continue;
+      
+      const result = await response.json();
+      if (!result?.data) continue;
+      
+      console.log("Data received from", url);
+      updateMap(result.data);
+      return; // Success - exit the function
+      
+    } catch (error) {
+      console.warn(`Attempt failed: ${error.message}`);
+    }
   }
+  
+  console.error("All fetch attempts failed. Retrying in 10s...");
+  setTimeout(fetchData, 10000);
 }
 
-// Update map with vehicle data
+// Optimized Map Update Function
 function updateMap(vehicles) {
   vehicles.forEach(vehicle => {
-    const { VehicleID, Lat, Lng, Time } = vehicle;
-    if (!Lat || !Lng) return;
+    const { VehicleID, Lat, Lng, Time, Speed } = vehicle;
+    if (typeof Lat !== 'number' || typeof Lng !== 'number') return;
 
-    const color = vehicleColors[VehicleID] || "black";
-    const popupContent = `${VehicleID}<br>Time: ${Time || "N/A"}`;
+    const color = vehicleColors[VehicleID] || "gray";
+    const popupContent = `
+      <b>${VehicleID}</b><br>
+      ${Time ? `Time: ${Time}<br>` : ''}
+      Location: ${Lat.toFixed(6)}, ${Lng.toFixed(6)}<br>
+      ${Speed ? `Speed: ${Speed} km/h` : ''}
+    `;
 
+    // Update or create marker
     if (vehicleMarkers[VehicleID]) {
       vehicleMarkers[VehicleID]
         .setLatLng([Lat, Lng])
@@ -72,19 +90,25 @@ function updateMap(vehicles) {
     } else {
       vehicleMarkers[VehicleID] = L.circleMarker([Lat, Lng], {
         color: color,
-        radius: 8
-      }).addTo(map).bindPopup(popupContent);
+        radius: 8,
+        fillOpacity: 0.8
+      }).bindPopup(popupContent).addTo(map);
     }
 
+    // Update or create trail
     if (!vehicleTrails[VehicleID]) {
-      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], { color }).addTo(map);
+      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], {
+        color: color,
+        weight: 3
+      }).addTo(map);
     } else {
       vehicleTrails[VehicleID].addLatLng([Lat, Lng]);
     }
   });
 }
 
-// Initialize
-fetchData();
-setInterval(fetchData, 5000);
-
+// Initialize Application
+document.addEventListener("DOMContentLoaded", () => {
+  fetchData();
+  setInterval(fetchData, 15000); // Refresh every 15 seconds
+});
