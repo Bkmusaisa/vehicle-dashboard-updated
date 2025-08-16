@@ -1,5 +1,5 @@
 // ✅ Fixed: Single clean version (remove duplicates)
-const sheetURL = "https://script.google.com/macros/s/AKfycbxkaXTjaq8lSqnOqBSrOxc9QASZQDQDhKaFSHlKHu4ay91OReQGGP2bzYtGm183iac/exec";
+const sheetURL = "https://script.google.com/macros/s/AKfycbxFqz8TxthBA8Aed8HtbTDB0qIUZ5o4UVQf0VFUy8McvnmQiHpwBm6p6vdfInUQjPcj/exec";
 const ADMIN_LAT = 11.1523;
 const ADMIN_LNG = 7.6548;
 
@@ -73,3 +73,32 @@ function updateMap(data) {
 
 // Refresh data every 5 seconds
 setInterval(fetchData, 5000);
+
+function updateMap(data) {
+  data.forEach(vehicle => {
+    const { VehicleID, Lat, Lng, Time } = vehicle; // Added Time
+    if (!Lat || !Lng) return;
+
+    const color = vehicleColors[VehicleID] || "black";
+    const popupContent = `${VehicleID}<br>Time: ${Time || "N/A"}`; // Added time display
+
+    // Update marker with time
+    if (vehicleMarkers[VehicleID]) {
+      vehicleMarkers[VehicleID]
+        .setLatLng([Lat, Lng])
+        .setPopupContent(popupContent); // Update popup
+    } else {
+      vehicleMarkers[VehicleID] = L.circleMarker([Lat, Lng], {
+        color: color,
+        radius: 8
+      }).addTo(map).bindPopup(popupContent); // Show time in popup
+    }
+
+    // Trail logic remains the same
+    if (!vehicleTrails[VehicleID]) {
+      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], { color: color }).addTo(map);
+    } else {
+      vehicleTrails[VehicleID].addLatLng([Lat, Lng]);
+    }
+  });
+}
