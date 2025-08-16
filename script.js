@@ -1,5 +1,11 @@
+async function fetchData() {
+  try {
+    const response = await fetch(sheetURL, {
+      mode: 'no-cors' 
+    });
+    
 // ✅ Fixed: Single clean version (remove duplicates)
-const sheetURL = "https://script.google.com/macros/s/AKfycbxFqz8TxthBA8Aed8HtbTDB0qIUZ5o4UVQf0VFUy8McvnmQiHpwBm6p6vdfInUQjPcj/exec";
+const sheetURL = "https://script.google.com/macros/s/AKfycbz9O7LzggJdHaJUko9Qn_CUr07iVFfmd6NMM-ylAgSy1NzHFgzc8DbruQcX1hMgZ_vJ/exec";
 const ADMIN_LAT = 11.1523;
 const ADMIN_LNG = 7.6548;
 
