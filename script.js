@@ -1,4 +1,8 @@
 // Configuration
+const url = `https://script.google.com/macros/s/AKfycbwrGelGMLzOhq0EopHZLRJlPtROj_BaF9XivCXmcqwKopD3TC3Tz2RpvGRnjQe1k9uD/exec?t=${Date.now()}`;
+const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+
+// Use proxyUrl instead of url in fetch()
 const sheetURL = "https://script.google.com/macros/s/AKfycbwrGelGMLzOhq0EopHZLRJlPtROj_BaF9XivCXmcqwKopD3TC3Tz2RpvGRnjQe1k9uD/exec";
 const ADMIN_LAT = 11.1523;
 const ADMIN_LNG = 7.6548;
@@ -83,3 +87,4 @@ function updateMap(vehicles) {
 // Initialize
 fetchData();
 setInterval(fetchData, 5000);
+
