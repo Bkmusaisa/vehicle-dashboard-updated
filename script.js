@@ -1,5 +1,5 @@
 // Configuration
-const sheetURL = "https://script.google.com/macros/s/AKfycbz9O7LzggJdHaJUko9Qn_CUr07iVFfmd6NMM-ylAgSy1NzHFgzc8DbruQcX1hMgZ_vJ/exec";
+const sheetURL = "https://script.google.com/macros/s/AKfycbyopuP9hDyinoaM4oqUE5vUP8jpCNTzZSrUeDzcTcRljm3y5OI5ExFxIM6e9JPuwqzq/exec";
 const ADMIN_LAT = 11.1523;
 const ADMIN_LNG = 7.6548;
 
@@ -29,34 +29,36 @@ L.marker([ADMIN_LAT, ADMIN_LNG], {
 let vehicleMarkers = {};
 let vehicleTrails = {};
 
-// Fetch data from Google Sheets
+// Modified fetch function (CORS-compatible)
 async function fetchData() {
   try {
     const url = `${sheetURL}?t=${Date.now()}`;
-    const response = await fetch(url, { 
-      cache: 'no-store',
-      mode: 'no-cors'
+    const response = await fetch(url, {
+      cache: 'no-store'
+      // Removed mode: 'no-cors' to allow reading response
     });
     
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     const data = await response.json();
-    const vehicles = Array.isArray(data) ? data : data.data;
+    
+    // Handle both direct array and {data: array} responses
+    const vehicles = Array.isArray(data) ? data : (data.data || []);
     updateMap(vehicles);
   } catch (err) {
-    console.error("Error fetching data:", err);
+    console.error("Fetch error (retrying in 10s):", err);
     setTimeout(fetchData, 10000);
   }
 }
 
-// Single, corrected updateMap function
-function updateMap(data) {
-  data.forEach(vehicle => {
+// Update map with vehicle data
+function updateMap(vehicles) {
+  vehicles.forEach(vehicle => {
     const { VehicleID, Lat, Lng, Time } = vehicle;
     if (!Lat || !Lng) return;
 
     const color = vehicleColors[VehicleID] || "black";
     const popupContent = `${VehicleID}<br>Time: ${Time || "N/A"}`;
 
-    // Update or create marker
     if (vehicleMarkers[VehicleID]) {
       vehicleMarkers[VehicleID]
         .setLatLng([Lat, Lng])
@@ -68,15 +70,14 @@ function updateMap(data) {
       }).addTo(map).bindPopup(popupContent);
     }
 
-    // Update or create trail
     if (!vehicleTrails[VehicleID]) {
-      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], { color: color }).addTo(map);
+      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], { color }).addTo(map);
     } else {
       vehicleTrails[VehicleID].addLatLng([Lat, Lng]);
     }
   });
 }
 
-// Start the system
+// Initialize
 fetchData();
 setInterval(fetchData, 5000);
