@@ -31,30 +31,24 @@ let vehicleTrails = {};
 
 async function fetchData() {
   try {
-    const url = `${sheetURL}?t=${Date.now()}`;
-    console.log("[1] Starting fetch to:", url);
+    // Add /dev to the URL to prevent redirects
+    const url = `${sheetURL.replace('/exec', '/dev')}?t=${Date.now()}`;
+    console.log("Fetching:", url);
     
-    const response = await fetch(url);
-    console.log("[2] Got response, status:", response.status);
+    const response = await fetch(url, {
+      redirect: 'follow', // Explicitly follow redirects
+      credentials: 'omit' // Important for CORS
+    });
     
-    if (!response.ok) {
-      console.log("[3] Bad response:", await response.text());
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     
-    const result = await response.json();
-    console.log("[4] Parsed JSON:", result);
+    const data = await response.json();
+    if (!data?.data) throw new Error("Invalid data format");
     
-    if (!result.data) {
-      console.log("[5] Missing data field in response");
-      throw new Error("Invalid data format");
-    }
-    
-    console.log("[6] Updating map with", result.data.length, "vehicles");
-    updateMap(result.data);
+    updateMap(data.data);
   } catch (err) {
-    console.error("[7] Full fetch error:", err);
-    setTimeout(fetchData, 10000);
+    console.error("Fetch error (retrying in 5s):", err);
+    setTimeout(fetchData, 5000);
   }
 }
 
