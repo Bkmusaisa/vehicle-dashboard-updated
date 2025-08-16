@@ -31,27 +31,30 @@ let vehicleTrails = {};
 
 async function fetchData() {
   try {
-    const url = `${sheetURL}?t=${Date.now()}`; // Cache buster
-    console.log("Fetching:", url);
+    const url = `${sheetURL}?t=${Date.now()}`;
+    console.log("[1] Starting fetch to:", url);
     
     const response = await fetch(url);
+    console.log("[2] Got response, status:", response.status);
     
-    // Handle non-200 responses
     if (!response.ok) {
+      console.log("[3] Bad response:", await response.text());
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const result = await response.json();
+    console.log("[4] Parsed JSON:", result);
     
-    // Validate response structure
     if (!result.data) {
+      console.log("[5] Missing data field in response");
       throw new Error("Invalid data format");
     }
     
+    console.log("[6] Updating map with", result.data.length, "vehicles");
     updateMap(result.data);
   } catch (err) {
-    console.error("Fetch error:", err);
-    setTimeout(fetchData, 10000); // Retry after 10s
+    console.error("[7] Full fetch error:", err);
+    setTimeout(fetchData, 10000);
   }
 }
 
