@@ -37,7 +37,7 @@ async function fetchData() {
   try {
     // Add /dev to the URL to prevent redirects
     const url = `${sheetURL.replace('/exec', '/dev')}?t=${Date.now()}`;
-    console.log("Fetching:", url);
+    console.log("Fetching:", https://script.google.com/macros/s/AKfycbwrGelGMLzOhq0EopHZLRJlPtROj_BaF9XivCXmcqwKopD3TC3Tz2RpvGRnjQe1k9uD/exec);
     
     const response = await fetch(url, {
       redirect: 'follow', // Explicitly follow redirects
