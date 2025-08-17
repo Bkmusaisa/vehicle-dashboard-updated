@@ -1,10 +1,4 @@
-// TEMPORARY TEST - PUT THIS FIRST
-console.log("Script loaded successfully");
-alert("Leaflet available? " + (typeof L !== 'undefined'));
 
-const testMap = L.map("map").setView([11.1523, 7.6548], 14);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(testMap);
-L.marker([11.1523, 7.6548]).bindPopup("TEST MARKER").addTo(testMap);
 // Configuration
 const SCRIPT_ID = "AKfycbwp8MJezh9XjFHayC0BlL_MCAn_v2SkV90jmEls-cGrFyfmTtSNx-ZAGxguqC-kg1dV";
 const ADMIN_LAT = 11.1523;
