@@ -1,92 +1,48 @@
+// 1. Initialize Map
+const map = L.map('map').setView([11.1523, 7.6548], 14);
 
-// Configuration
-const SCRIPT_ID = "AKfycbwp8MJezh9XjFHayC0BlL_MCAn_v2SkV90jmEls-cGrFyfmTtSNx-ZAGxguqC-kg1dV";
-const ADMIN_LAT = 11.1523;
-const ADMIN_LNG = 7.6548;
-
-// URL Configuration
-const PROD_URL = `https://script.google.com/macros/s/${SCRIPT_ID}/exec`;
-
-// Map Initialization - VERIFIED PARENTHESIS
-const map = L.map("map").setView([ADMIN_LAT, ADMIN_LNG], 14);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+// 2. Add Map Tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// Admin Marker - VERIFIED PARENTHESIS
-L.marker([ADMIN_LAT, ADMIN_LNG], { 
-  icon: L.divIcon({ 
-    className: 'admin-marker',
-    html: '⬤',
-    iconSize: [20, 20]
-  })
-}).bindPopup("Admin Location - ABU Senate Building").addTo(map);
+// 3. Add Admin Marker
+L.marker([11.1523, 7.6548])
+  .bindPopup("<b>ABU Senate Building</b>")
+  .addTo(map);
 
-// Vehicle Tracking
+// 4. Vehicle Tracking
 const vehicleMarkers = {};
-const vehicleTrails = {};
 
-// Fetch Function - VERIFIED PARENTHESIS
 async function fetchData() {
   try {
-    const url = `${PROD_URL}?t=${Date.now()}`;
-    const response = await fetch(url);
+    const SCRIPT_ID = "AKfycbwp8MJezh9XjFHayC0BlL_MCAn_v2SkV90jmEls-cGrFyfmTtSNx-ZAGxguqC-kg1dV";
+    const response = await fetch(
+      `https://script.google.com/macros/s/${SCRIPT_ID}/exec?t=${Date.now()}`
+    );
     
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    
-    const result = await response.json();
-    if (!result?.data) throw new Error("Invalid data format");
-    
-    updateMap(result.data);
+    const { data } = await response.json();
+    updateVehicles(data);
   } catch (error) {
     console.error("Fetch error:", error);
-    setTimeout(fetchData, 10000);
+    setTimeout(fetchData, 5000);
   }
 }
 
-// Update Map - VERIFIED PARENTHESIS
-function updateMap(vehicles) {
+function updateVehicles(vehicles) {
+  // Clear old markers
+  Object.values(vehicleMarkers).forEach(marker => map.removeLayer(marker));
+
+  // Add new markers
   vehicles.forEach(vehicle => {
-    const { VehicleID, Lat, Lng, Time } = vehicle;
-    if (!Lat || !Lng) return;
-
-    const color = vehicleColors[VehicleID] || "black";
-    const popupContent = `${VehicleID}<br>Time: ${Time || "N/A"}`;
-
-    if (vehicleMarkers[VehicleID]) {
-      vehicleMarkers[VehicleID]
-        .setLatLng([Lat, Lng])
-        .setPopupContent(popupContent);
-    } else {
-      vehicleMarkers[VehicleID] = L.circleMarker([Lat, Lng], {
-        color: color,
-        radius: 8
-      }).addTo(map).bindPopup(popupContent);
-    }
-
-    if (!vehicleTrails[VehicleID]) {
-      vehicleTrails[VehicleID] = L.polyline([[Lat, Lng]], { 
-        color: color 
-      }).addTo(map);
-    } else {
-      vehicleTrails[VehicleID].addLatLng([Lat, Lng]);
-    }
+    const { VehicleID, Lat, Lng } = vehicle;
+    vehicleMarkers[VehicleID] = L.marker([Lat, Lng])
+      .bindPopup(`<b>${VehicleID}</b>`)
+      .addTo(map);
   });
 }
 
-// Vehicle Colors - VERIFIED PARENTHESIS
-const vehicleColors = {
-  "Vehicle 1": "blue",
-  "Vehicle 2": "green",
-  "Vehicle 3": "red",
-  "Vehicle 4": "orange",
-  "Vehicle 5": "purple"
-};
-
-// Initialize - VERIFIED PARENTHESIS
-document.addEventListener("DOMContentLoaded", () => {
-  fetchData();
-  setInterval(fetchData, 5000);
-});
+// 5. Start the system
+fetchData();
+setInterval(fetchData, 10000); // Update every 10 seconds

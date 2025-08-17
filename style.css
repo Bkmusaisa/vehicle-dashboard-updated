@@ -1,80 +1,8 @@
-/* General Reset */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-/* Login Page Styling */
-.login-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: #e9f5ec;
+body {
+  margin: 0;
+  padding: 0;
 }
-
-.login-container {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.login-container input {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 1rem 0;
-}
-
-.login-container button {
-    padding: 0.5rem 1rem;
-    background: darkgreen;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-.login-container button:hover {
-    background: green;
-}
-
-.error {
-    color: red;
-    font-size: 0.9rem;
-}
-
-/* Dashboard Layout */
-header {
-    background: green;
-    color: white;
-    padding: 1rem;
-    text-align: center;
-}
-
-main {
-    display: flex;
-    height: calc(100vh - 60px);
-}
-
 #map {
-    flex: 3;
-}
-
-#status-panel {
-    flex: 1;
-    background: #f7f7f7;
-    padding: 1rem;
-    overflow-y: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 0.5rem;
-    border-bottom: 1px solid #ddd;
-}
-
-th {
-    background: #ddd;
+  height: 100vh;
+  width: 100vw;
 }
