@@ -25,6 +25,37 @@ function updateVehicles(vehicleData) {
   vehicleData.forEach(vehicle => {
     const { VehicleID, Lat, Lng, Speed, Time } = vehicle;
     
+// Vehicle colors configuration (add at top)
+const vehicleColors = {
+  "Vehicle 1": "blue",
+  "Vehicle 2": "green",
+  // Add more as needed
+};
+
+// Modified updateVehicles function
+function updateVehicles(vehicleData) {
+  vehicleData.forEach(vehicle => {
+    const { VehicleID, Lat, Lng } = vehicle;
+    
+    // Get color from config or default to red
+    const color = vehicleColors[VehicleID] || "red";
+    
+    if (window.vehicleMarkers[VehicleID]) {
+      window.vehicleMarkers[VehicleID]
+        .setLatLng([Lat, Lng])
+        .setPopupContent(`${VehicleID} (${color})`);
+    } else {
+      window.vehicleMarkers[VehicleID] = L.circleMarker([Lat, Lng], {
+        color: color,
+        fillColor: color,
+        radius: 8,
+        fillOpacity: 0.8
+      })
+      .bindPopup(`${VehicleID}`)
+      .addTo(map);
+    }
+  });
+}
     // Store/update vehicle info
     vehicles[VehicleID] = { Lat, Lng, Speed, Time };
     
@@ -66,7 +97,18 @@ function updateTable() {
     tableBody.appendChild(row);
   });
 }
+// Add this after map initialization
+const senateBuilding = [11.1523, 7.6548]; // ABU Senate coordinates
 
+L.marker(senateBuilding, {
+  icon: L.divIcon({
+    className: 'admin-marker',
+    html: '⬤', // Solid circle
+    iconSize: [24, 24]
+  })
+})
+.bindPopup("<b>Ahmadu Bello University</b><br>Senate Building")
+.addTo(map);
 // Initialize
 fetchData();
 setInterval(fetchData, 10000); // Update every 10 seconds

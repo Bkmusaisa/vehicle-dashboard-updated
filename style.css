@@ -1,3 +1,8 @@
+.admin-marker {
+  color: #d35400; /* Orange color for admin */
+  text-align: center;
+  font-weight: bold;
+}
 body {
   margin: 0;
   padding: 0;
