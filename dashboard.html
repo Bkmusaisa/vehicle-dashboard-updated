@@ -8,9 +8,26 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="map"></div>
+  <div class="container">
+    <div id="map"></div>
+    <div id="vehicle-table">
+      <h2>Vehicle Status</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Speed</th>
+            <th>Last Update</th>
+          </tr>
+        </thead>
+        <tbody id="vehicle-data">
+          <!-- Data will appear here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
