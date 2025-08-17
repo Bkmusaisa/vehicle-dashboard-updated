@@ -109,6 +109,42 @@ L.marker(senateBuilding, {
 })
 .bindPopup("<b>Ahmadu Bello University</b><br>Senate Building")
 .addTo(map);
+
+// Add this with other variables
+const vehicleTrails = {};
+
+function updateVehicles(vehicles) {
+  vehicles.forEach(vehicle => {
+    const { VehicleID, Lat, Lng } = vehicle;
+    const color = vehicleColors[VehicleID] || "red";
+    const position = [Lat, Lng];
+
+    // Update or create marker
+    if (vehicleMarkers[VehicleID]) {
+      vehicleMarkers[VehicleID]
+        .setLatLng(position)
+        .setPopupContent(`${VehicleID} (${Speed} km/h)`);
+    } else {
+      vehicleMarkers[VehicleID] = L.circleMarker(position, {
+        color: color,
+        fillColor: color,
+        radius: 8,
+        fillOpacity: 0.8
+      }).bindPopup(VehicleID).addTo(map);
+    }
+
+    // Update trail
+    if (!vehicleTrails[VehicleID]) {
+      vehicleTrails[VehicleID] = L.polyline([position], { 
+        color: color,
+        weight: 4 
+      }).addTo(map);
+    } else {
+      vehicleTrails[VehicleID].addLatLng(position);
+    }
+  });
+}
+
 // Initialize
 fetchData();
 setInterval(fetchData, 10000); // Update every 10 seconds
