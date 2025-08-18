@@ -1,6 +1,8 @@
 // 1. CONSTANTS
 const SCRIPT_ID = "AKfycbwp8MJezh9XjFHayC0BlL_MCAn_v2SkV90jmEls-cGrFyfmTtSNx-ZAGxguqC-kg1dV";
 const senateBuilding = [11.1523, 7.6548]; // ABU Senate coordinates
+console.log("Current VehicleID:", VehicleID); // Check exact value
+console.log("Available colors:", Object.keys(vehicleColors)); // Check keys
 const vehicleColors = {
   "Vehicle 1": "blue",
   "Vehicle 2": "green",
@@ -37,32 +39,31 @@ async function fetchData() {
   }
 }
 
-function updateVehicles(vehicleData) {
-  vehicleData.forEach(vehicle => {
-    const { VehicleID, Lat, Lng, Speed, Time } = vehicle;
-    const position = [Lat, Lng];
-    const color = vehicleColors[VehicleID] || "gray";
-
-    // Store for table
-    vehicles[VehicleID] = { Speed, Time };
-
-    // Update marker
+function updateVehicles(vehicles) {
+  vehicles.forEach(vehicle => {
+    const { VehicleID, Lat, Lng } = vehicle;
+    
+    // Debugging (check console)
+    console.log(`Processing: ${VehicleID}`); 
+    
+    // Get color - trim() removes whitespace
+    const color = vehicleColors[VehicleID?.trim()] || "red"; 
+    
+    // Create/update marker
     if (vehicleMarkers[VehicleID]) {
       vehicleMarkers[VehicleID]
-        .setLatLng(position)
-        .setPopupContent(`
-          <b>${VehicleID}</b><br>
-          Speed: ${Speed || 'N/A'} km/h<br>
-          Time: ${Time || 'N/A'}
-        `);
+        .setLatLng([Lat, Lng])
+        .setPopupContent(`${VehicleID}`);
     } else {
-      vehicleMarkers[VehicleID] = L.circleMarker(position, {
+      vehicleMarkers[VehicleID] = L.circleMarker([Lat, Lng], {
         color: color,
-        fillColor: color,
+        fillColor: color, // Ensure both match
         radius: 8,
         fillOpacity: 0.8
       }).bindPopup(VehicleID).addTo(map);
     }
+  });
+}
 
     // Update trail
     if (!vehicleTrails[VehicleID]) {
