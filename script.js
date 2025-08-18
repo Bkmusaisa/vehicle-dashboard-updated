@@ -11,8 +11,7 @@ const vehicleColors = {
 
 // 2. MAP INITIALIZATION
 const map = L.map('map').setView(senateBuilding, 14);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}/.png').addTo(map);
-
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 // 3. ADMIN MARKER
 L.marker(senateBuilding, {
   icon: L.divIcon({
