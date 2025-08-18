@@ -1,8 +1,7 @@
 // 1. CONSTANTS
 const SCRIPT_ID = "AKfycbwp8MJezh9XjFHayC0BlL_MCAn_v2SkV90jmEls-cGrFyfmTtSNx-ZAGxguqC-kg1dV";
 const senateBuilding = [11.1523, 7.6548]; // ABU Senate coordinates
-console.log("Current VehicleID:", VehicleID); // Check exact value
-console.log("Available colors:", Object.keys(vehicleColors)); // Check keys
+
 const vehicleColors = {
   "Vehicle 1": "blue",
   "Vehicle 2": "green",
