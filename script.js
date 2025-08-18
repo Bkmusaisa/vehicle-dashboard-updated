@@ -9,17 +9,13 @@ const vehicleColors = {
   "Vehicle 5": "purple"
 };
 
-// 2. MAP INITIALIZATION
-const map = L.map('map').setView(senateBuilding, 14);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-// 3. ADMIN MARKER
-L.marker(senateBuilding, {
-  icon: L.divIcon({
-    className: 'admin-marker',
-    html: '⬤',
-    iconSize: [24, 24]
-  })
-}).bindPopup("<b>Ahmadu Bello University</b><br>Senate Building").addTo(map);
+// CORRECTED MAP INITIALIZATION
+const map = L.map('map').setView([11.1523, 7.6548], 14);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
 
 // 4. VEHICLE TRACKING
 const vehicleMarkers = {};
