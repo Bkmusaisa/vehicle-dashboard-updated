@@ -70,23 +70,22 @@ function updateVehicles(vehicleList) {
       }).bindPopup(VehicleID).addTo(map);
     }
 
-    // Update vehicle trail
-    if (!vehicleTrails[VehicleID]) {
-      vehicleTrails[VehicleID] = L.polyline([position], {
-        color: color,
-        weight: 3
-      }).addTo(map);
-    } else {
-      vehicleTrails[VehicleID].addLatLng(position);
-    }
-
-    // Update vehicle info for table
-    vehicles[VehicleID] = {
-      Speed: vehicle.Speed || null,
-      Time: vehicle.Time || null
-    };
-  });
+   // Reset and redraw vehicle trail each update
+if (vehicleTrails[VehicleID]) {
+  map.removeLayer(vehicleTrails[VehicleID]); // remove old trail
 }
+
+// Build new trail from all history rows of this vehicle
+const history = vehicleList
+  .filter(v => v.VehicleID === VehicleID && v.Lat && v.Lng)
+  .sort((a, b) => new Date(a.Time) - new Date(b.Time)) // sort by timestamp
+  .map(v => [v.Lat, v.Lng]);
+
+vehicleTrails[VehicleID] = L.polyline(history, {
+  color: color,
+  weight: 3
+}).addTo(map);
+
 
 function updateTable() {
   const tableBody = document.getElementById('vehicle-data');
