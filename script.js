@@ -10,20 +10,28 @@ const vehicleColors = {
   "Vehicle 5": "purple"
 };
 
-// CORRECTED MAP INITIALIZATION
-const map = L.map('map').setView([11.1523, 7.6548], 14);
+// MAP INITIALIZATION
+const map = L.map('map').setView(senateBuilding, 14);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-// 4. VEHICLE TRACKING
+// ADMIN LOCATION (Black Dot)
+L.circleMarker(senateBuilding, {
+  color: "black",
+  fillColor: "black",
+  radius: 10,
+  fillOpacity: 1
+}).bindPopup("Admin Location (Senate Building)").addTo(map);
+
+// VEHICLE TRACKING
 const vehicleMarkers = {};
 const vehicleTrails = {};
 const vehicles = {}; // For table data
 
-// 5. FUNCTIONS
+// FUNCTIONS
 async function fetchData() {
   try {
     const response = await fetch(
@@ -38,33 +46,30 @@ async function fetchData() {
   }
 }
 
-function updateVehicles(vehicles) {
-  vehicles.forEach(vehicle => {
+function updateVehicles(vehicleList) {
+  vehicleList.forEach(vehicle => {
     const { VehicleID, Lat, Lng } = vehicle;
+    const position = [Lat, Lng];
     
-    // Debugging (check console)
     console.log(`Processing: ${VehicleID}`); 
     
-    // Get color - trim() removes whitespace
     const color = vehicleColors[VehicleID?.trim()] || "red"; 
     
     // Create/update marker
     if (vehicleMarkers[VehicleID]) {
       vehicleMarkers[VehicleID]
-        .setLatLng([Lat, Lng])
+        .setLatLng(position)
         .setPopupContent(`${VehicleID}`);
     } else {
-      vehicleMarkers[VehicleID] = L.circleMarker([Lat, Lng], {
+      vehicleMarkers[VehicleID] = L.circleMarker(position, {
         color: color,
-        fillColor: color, // Ensure both match
+        fillColor: color,
         radius: 8,
         fillOpacity: 0.8
       }).bindPopup(VehicleID).addTo(map);
     }
-  });
-}
 
-    // Update trail
+    // Update vehicle trail
     if (!vehicleTrails[VehicleID]) {
       vehicleTrails[VehicleID] = L.polyline([position], {
         color: color,
@@ -73,6 +78,12 @@ function updateVehicles(vehicles) {
     } else {
       vehicleTrails[VehicleID].addLatLng(position);
     }
+
+    // Update vehicle info for table
+    vehicles[VehicleID] = {
+      Speed: vehicle.Speed || null,
+      Time: vehicle.Time || null
+    };
   });
 }
 
@@ -91,6 +102,6 @@ function updateTable() {
   });
 }
 
-// 6. START SYSTEM
+// START SYSTEM
 fetchData();
 setInterval(fetchData, 10000);
