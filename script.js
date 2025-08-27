@@ -1,5 +1,6 @@
 // 1. CONSTANTS
-const SCRIPT_ID = "AKfycbwp8MJezh9XjFHayC0BlL_MCAn_v2SkV90jmEls-cGrFyfmTtSNx-ZAGxguqC-kg1dV";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuIJQXEzFT3RZgSrgB3mVDDWHqD347SIXGqUjtdC2cFG0rdN4wjL7hUELEqwFqlej5/exec";
+
 const senateBuilding = [11.1523, 7.6548]; // ABU Senate coordinates
 
 const vehicleColors = {
@@ -35,7 +36,7 @@ const vehicles = {}; // For table data
 async function fetchData() {
   try {
     const response = await fetch(
-      `https://script.google.com/macros/s/${SCRIPT_ID}/exec?t=${Date.now()}`
+      `https://script.google.com/macros/s/AKfycbyuIJQXEzFT3RZgSrgB3mVDDWHqD347SIXGqUjtdC2cFG0rdN4wjL7hUELEqwFqlej5/exec?t=${Date.now()}`
     );
     const { data } = await response.json();
     updateVehicles(data);
