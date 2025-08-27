@@ -38,14 +38,11 @@ async function fetchData() {
     const response = await fetch(
       `https://script.google.com/macros/s/AKfycbyuIJQXEzFT3RZgSrgB3mVDDWHqD347SIXGqUjtdC2cFG0rdN4wjL7hUELEqwFqlej5/exec?t=${Date.now()}`
     );
-    const { data } = await response.json();
-    updateVehicles(data);
-    updateTable();
-  } catch (error) {
+     } catch (error) {
     console.error("Fetch error:", error);
     setTimeout(fetchData, 5000);
   }
-}
+} 
 
 function updateVehicles(vehicleList) {
   vehicleList.forEach(vehicle => {
