@@ -70,7 +70,7 @@ function updateVehicles(vehicleList) {
       }).bindPopup(VehicleID).addTo(map);
     }
 
-   // Reset and redraw vehicle trail each update
+// Reset and redraw vehicle trail each update
 if (vehicleTrails[VehicleID]) {
   map.removeLayer(vehicleTrails[VehicleID]); // remove old trail
 }
@@ -85,7 +85,7 @@ vehicleTrails[VehicleID] = L.polyline(history, {
   color: color,
   weight: 3
 }).addTo(map);
-
+}
 
 function updateTable() {
   const tableBody = document.getElementById('vehicle-data');
