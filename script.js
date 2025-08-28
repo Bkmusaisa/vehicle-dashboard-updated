@@ -67,7 +67,15 @@ function updateVehicles(vehicleList) {
       }).bindPopup(VehicleID).addTo(map);
     }
 
-// Update vehicle trail if (!vehicleTrails[VehicleID]) { vehicleTrails[VehicleID] = L.polyline([position], { color: color, weight: 3 }).addTo(map); } else { vehicleTrails[VehicleID].addLatLng(position); }
+// Update vehicle trail 
+if (!vehicleTrails[VehicleID]) { 
+vehicleTrails[VehicleID] = L.polyline([position], { 
+color: color, 
+weight: 3 
+}).addTo(map); 
+} else { 
+vehicleTrails[VehicleID].addLatLng(position); 
+}
 
 function updateTable() {
   const tableBody = document.getElementById('vehicle-data');
