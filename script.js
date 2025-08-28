@@ -1,105 +1,136 @@
-// 1. CONSTANTS
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuIJQXEzFT3RZgSrgB3mVDDWHqD347SIXGqUjtdC2cFG0rdN4wjL7hUELEqwFqlej5/exec";
+// ==============================
+// Vehicle Tracking Dashboard
+// ==============================
 
-const senateBuilding = [11.1523, 7.6548]; // ABU Senate coordinates
+// Store vehicle markers, trails, and colors
+let vehicles = {};
+let vehicleMarkers = {};
+let vehicleTrails = {};
+let vehicleColors = {};
 
-const vehicleColors = {
-  "Vehicle 1": "blue",
-  "Vehicle 2": "green",
-  "Vehicle 3": "red",
-  "Vehicle 4": "orange",
-  "Vehicle 5": "purple"
-};
+// Map setup
+const map = L.map("map").setView([11.1536, 7.6544], 13); // ABU Zaria coords
 
-// MAP INITIALIZATION
-const map = L.map('map').setView(senateBuilding, 14);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap contributors",
 }).addTo(map);
 
-// ADMIN LOCATION (Black Dot)
-L.circleMarker(senateBuilding, {
+// Admin center + geofence
+const adminLat = 11.1536;
+const adminLng = 7.6544;
+const geofenceRadius = 10000; // 10 km in meters
+
+L.circle([adminLat, adminLng], {
+  radius: geofenceRadius,
+  color: "red",
+  fillOpacity: 0.05,
+}).addTo(map);
+
+L.circleMarker([adminLat, adminLng], {
+  radius: 6,
   color: "black",
   fillColor: "black",
-  radius: 10,
-  fillOpacity: 1
-}).bindPopup("Admin Location (Senate Building)").addTo(map);
+  fillOpacity: 1,
+}).addTo(map);
 
-// VEHICLE TRACKING
-const vehicleMarkers = {};
-const vehicleTrails = {};
-const vehicles = {}; // For table data
+// Random color generator
+function getRandomColor() {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
-// FUNCTIONS
+// Fetch vehicle data from Google Sheets
 async function fetchData() {
   try {
-    const response = await fetch(`${SCRIPT_URL}?t=${Date.now()}`);
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbxzbcO9Lq-2Mn-HK-5-cCETF29bAQStNaofAb-xCZu9wMAqx3s0cfkvl8zEdqd6J2n8/exec"
+    );
     const result = await response.json();
 
-    if (result.status === "success" && result.data) {
-      updateVehicles(result.data);
+    if (result.status === "success") {
+      updateMap(result.data);
       updateTable();
     } else {
-      console.warn("No data or error in response:", result);
+      console.error("Error fetching data:", result.message);
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    setTimeout(fetchData, 5000); // retry after 5s
   }
 }
 
+// Update markers, trails, and status
+function updateMap(vehicleList) {
+  vehicleList.forEach((vehicle) => {
+    const { VehicleID, Lat, Lng, Speed, Time } = vehicle;
 
-function updateVehicles(vehicleList) {
-  vehicleList.forEach(vehicle => {
-    const { VehicleID, Lat, Lng } = vehicle;
-    const position = [Lat, Lng];
-    
-    console.log(`Processing: ${VehicleID}`); 
-    
-    const color = vehicleColors[VehicleID?.trim()] || "red"; 
-    
-    // Create/update marker
+    if (!Lat || !Lng) return;
+
+    // Assign color if new vehicle
+    if (!vehicleColors[VehicleID]) {
+      if (VehicleID === "Vehicle1") {
+        vehicleColors[VehicleID] = "blue";
+      } else if (VehicleID === "Vehicle2") {
+        vehicleColors[VehicleID] = "green";
+      } else {
+        vehicleColors[VehicleID] = getRandomColor();
+      }
+    }
+    const color = vehicleColors[VehicleID];
+
+    // Update marker
     if (vehicleMarkers[VehicleID]) {
-      vehicleMarkers[VehicleID]
-        .setLatLng(position)
-        .setPopupContent(`${VehicleID}`);
+      vehicleMarkers[VehicleID].setLatLng([Lat, Lng]);
     } else {
-      vehicleMarkers[VehicleID] = L.circleMarker(position, {
-        color: color,
-        fillColor: color,
-        radius: 8,
-        fillOpacity: 0.8
-      }).bindPopup(VehicleID).addTo(map);
+      vehicleMarkers[VehicleID] = L.marker([Lat, Lng], {
+        icon: L.icon({
+          iconUrl: `https://via.placeholder.com/30/${color.slice(1)}/ffffff?text=●`,
+          iconSize: [24, 24],
+        }),
+      })
+        .addTo(map)
+        .bindPopup(`${VehicleID}<br>Speed: ${Speed} km/h`);
     }
 
-// Update vehicle trail 
-if (!vehicleTrails[VehicleID]) { 
-vehicleTrails[VehicleID] = L.polyline([position], { 
-color: color, 
-weight: 3 
-}).addTo(map); 
-} else { 
-vehicleTrails[VehicleID].addLatLng(position); 
+    // Save last data
+    vehicles[VehicleID] = { Lat, Lng, Speed, Time };
+
+    // Redraw trail
+    if (vehicleTrails[VehicleID]) {
+      map.removeLayer(vehicleTrails[VehicleID]);
+    }
+
+    const history = vehicleList
+      .filter((v) => v.VehicleID === VehicleID && v.Lat && v.Lng)
+      .sort((a, b) => new Date(a.Time) - new Date(b.Time))
+      .map((v) => [v.Lat, v.Lng]);
+
+    vehicleTrails[VehicleID] = L.polyline(history, {
+      color: color,
+      weight: 3,
+    }).addTo(map);
+  });
 }
 
+// Update status table
 function updateTable() {
-  const tableBody = document.getElementById('vehicle-data');
-  tableBody.innerHTML = '';
-  
+  const tableBody = document.getElementById("vehicle-data");
+  tableBody.innerHTML = "";
+
   Object.entries(vehicles).forEach(([id, data]) => {
-    const row = document.createElement('tr');
+    const row = document.createElement("tr");
     row.innerHTML = `
       <td>${id}</td>
-      <td>${data.Speed || 'N/A'} km/h</td>
-      <td>${data.Time || 'N/A'}</td>
+      <td>${data.Speed || "N/A"} km/h</td>
+      <td>${data.Time || "N/A"}</td>
     `;
     tableBody.appendChild(row);
   });
 }
 
-
-// START SYSTEM
+// Start updates
 fetchData();
 setInterval(fetchData, 10000);
