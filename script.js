@@ -35,14 +35,21 @@ const vehicles = {}; // For table data
 // FUNCTIONS
 async function fetchData() {
   try {
-    const response = await fetch(
-      `https://script.google.com/macros/s/AKfycbyuIJQXEzFT3RZgSrgB3mVDDWHqD347SIXGqUjtdC2cFG0rdN4wjL7hUELEqwFqlej5/exec?t=${Date.now()}`
-    );
-     } catch (error) {
+    const response = await fetch(`${SCRIPT_URL}?t=${Date.now()}`);
+    const result = await response.json();
+
+    if (result.status === "success" && result.data) {
+      updateVehicles(result.data);
+      updateTable();
+    } else {
+      console.warn("No data or error in response:", result);
+    }
+  } catch (error) {
     console.error("Fetch error:", error);
-    setTimeout(fetchData, 5000);
+    setTimeout(fetchData, 5000); // retry after 5s
   }
-} 
+}
+
 
 function updateVehicles(vehicleList) {
   vehicleList.forEach(vehicle => {
@@ -91,6 +98,7 @@ function updateTable() {
     tableBody.appendChild(row);
   });
 }
+
 
 // START SYSTEM
 fetchData();
