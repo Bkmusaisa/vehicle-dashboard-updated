@@ -67,22 +67,45 @@ function updateVehicles(vehicleList) {
       }).bindPopup(VehicleID).addTo(map);
     }
 
-// Reset and redraw vehicle trail each update
-if (vehicleTrails[VehicleID]) {
-  map.removeLayer(vehicleTrails[VehicleID]); // remove old trail
+vehicleList.forEach(vehicle => {
+  const VehicleID = vehicle.VehicleID;
+  const Lat = vehicle.Lat;
+  const Lng = vehicle.Lng;
+  const Speed = vehicle.Speed;
+  const Time = vehicle.Time;
+  const color = vehicleColors[VehicleID] || "red";
+
+  const position = [Lat, Lng];
+
+  // If marker doesn't exist, create it
+  if (!vehicleMarkers[VehicleID]) {
+    vehicleMarkers[VehicleID] = L.marker(position, { icon: createColoredIcon(color) })
+      .bindPopup(`<b>${VehicleID}</b><br>Speed: ${Speed} km/h<br>Time: ${Time}`)
+      .addTo(map);
+  } else {
+    vehicleMarkers[VehicleID]
+      .setLatLng(position)
+      .setPopupContent(`<b>${VehicleID}</b><br>Speed: ${Speed} km/h<br>Time: ${Time}`);
+  }
+
+  // Reset and redraw vehicle trail each update
+  if (vehicleTrails[VehicleID]) {
+    map.removeLayer(vehicleTrails[VehicleID]); // remove old trail
+  }
+
+  // Build new trail from all history rows of this vehicle
+  const history = vehicleList
+    .filter(v => v.VehicleID === VehicleID && v.Lat && v.Lng)
+    .sort((a, b) => new Date(a.Time) - new Date(b.Time)) // sort by timestamp
+    .map(v => [v.Lat, v.Lng]);
+
+  vehicleTrails[VehicleID] = L.polyline(history, {
+    color: color,
+    weight: 3
+  }).addTo(map);
+});
 }
 
-// Build new trail from all history rows of this vehicle
-const history = vehicleList
-  .filter(v => v.VehicleID === VehicleID && v.Lat && v.Lng)
-  .sort((a, b) => new Date(a.Time) - new Date(b.Time)) // sort by timestamp
-  .map(v => [v.Lat, v.Lng]);
-
-vehicleTrails[VehicleID] = L.polyline(history, {
-  color: color,
-  weight: 3
-}).addTo(map);
-}
 
 function updateTable() {
   const tableBody = document.getElementById('vehicle-data');
