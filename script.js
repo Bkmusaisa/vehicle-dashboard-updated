@@ -1,6 +1,8 @@
 // ==============================
 // Vehicle Tracking Dashboard
 // ==============================
+// Google Apps Script Web App endpoint
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyA_5rGis9_9eFkldCK5b2IbBbAaHidm5AZU31GCUsDY1PpTdqqGqNtOckyKjlcYW8V/exec";
 
 // Store vehicle markers, trails, and colors
 let vehicles = {};
@@ -46,19 +48,19 @@ function getRandomColor() {
 // Fetch vehicle data from Google Sheets
 async function fetchData() {
   try {
-    const response = await fetch(
-      "https://script.google.com/macros/s/AKfycbxzbcO9Lq-2Mn-HK-5-cCETF29bAQStNaofAb-xCZu9wMAqx3s0cfkvl8zEdqd6J2n8/exec"
-    );
-    const result = await response.json();
+    const response = await fetch(SHEET_API_URL, {
+      method: "GET",
+      mode: "no-cors"   // 👈 This avoids the CORS block
+    });
 
-    if (result.status === "success") {
-      updateMap(result.data);
-      updateTable();
-    } else {
-      console.error("Error fetching data:", result.message);
-    }
+    const text = await response.text();
+    const json = JSON.parse(text);
+
+    console.log("Fetched data:", json);
+    return json;
   } catch (error) {
     console.error("Fetch error:", error);
+    return null;
   }
 }
 
