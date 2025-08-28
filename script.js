@@ -51,7 +51,7 @@ async function fetchData() {
     const response = await fetch(SHEET_API_URL);
     if (!response.ok) throw new Error("Network response was not ok");
     const result = await response.json();
-    console.log("Data from Google Sheets:", result);
+    console.log("First row:", data.data[0]);
     // process your result.data here
   } catch (err) {
     console.error("Fetch error:", err);
